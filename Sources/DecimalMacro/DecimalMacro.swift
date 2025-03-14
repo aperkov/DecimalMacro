@@ -5,18 +5,33 @@ import Foundation
 /// For example this code:
 ///
 /// ```
-/// let bad = Decimal(3.24)
-/// let good = #decimal(3.24)
+/// import DecimalMacro
 ///
-/// print(bad)
+/// let good = #decimal(3.24)
 /// print(good)
+///
+/// let alsoGood = #decimal(1234567890.0987654321)
+/// print(alsoGood)
 /// ```
 ///
-/// produces this output:
+/// Produces this output:
+///
+/// ```
+/// 3.24
+/// 1234567890.0987654321
+/// ```
+///
+/// This contrasts with what you might otherwise try:
+///
+/// ```
+/// let bad = Decimal(3.24)
+/// print(bad)
+/// ```
+///
+/// Which produces this output:
 ///
 /// ```
 /// 3.240000000000000512
-/// 3.24
 /// ```
 @freestanding(expression)
 public macro decimal(_ value: FloatLiteralType) -> Decimal =
