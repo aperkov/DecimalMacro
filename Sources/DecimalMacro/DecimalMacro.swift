@@ -20,4 +20,4 @@ import Foundation
 /// ```
 @freestanding(expression)
 public macro decimal(_ value: FloatLiteralType) -> Decimal =
-  #externalMacro(module: "DecimalMacroImpl", type: "DecimalMacro")
+    #externalMacro(module: "DecimalMacroImpl", type: "DecimalMacro")
