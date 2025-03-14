@@ -5,7 +5,7 @@ import SwiftSyntaxMacros
 @main
 struct DecimalMacroPlugin: CompilerPlugin {
 
-    /// The macros provided by this plugin.
-    let providingMacros: [Macro.Type] = [DecimalMacro.self]
+  /// The macros provided by this plugin.
+  let providingMacros: [Macro.Type] = [DecimalMacro.self]
 
 }
