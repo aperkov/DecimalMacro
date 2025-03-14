@@ -1,11 +1,23 @@
-// The Swift Programming Language
-// https://docs.swift.org/swift-book
+import Foundation
 
-/// A macro that produces both a value and a string containing the
-/// source code that generated the value. For example,
+/// A macro that makes it easy to declare `Decimal` values precisely.
 ///
-///     #stringify(x + y)
+/// For example this code:
 ///
-/// produces a tuple `(x + y, "x + y")`.
+/// ```
+/// let bad = Decimal(3.24)
+/// let good = #decimal(3.24)
+///
+/// print(bad)
+/// print(good)
+/// ```
+///
+/// produces this output:
+///
+/// ```
+/// 3.240000000000000512
+/// 3.24
+/// ```
 @freestanding(expression)
-public macro stringify<T>(_ value: T) -> (T, String) = #externalMacro(module: "DecimalMacroMacros", type: "StringifyMacro")
+public macro decimal(_ value: FloatLiteralType) -> Decimal =
+    #externalMacro(module: "DecimalMacroImpl", type: "DecimalMacro")

@@ -1,48 +1,41 @@
-import SwiftSyntax
-import SwiftSyntaxBuilder
-import SwiftSyntaxMacros
+import DecimalMacroImpl
 import SwiftSyntaxMacrosTestSupport
 import XCTest
 
-// Macro implementations build for the host, so the corresponding module is not available when cross-compiling. Cross-compiled tests may still make use of the macro itself in end-to-end tests.
-#if canImport(DecimalMacroMacros)
-import DecimalMacroMacros
-
-let testMacros: [String: Macro.Type] = [
-    "stringify": StringifyMacro.self,
-]
-#endif
-
 final class DecimalMacroTests: XCTestCase {
-    func testMacro() throws {
-        #if canImport(DecimalMacroMacros)
-        assertMacroExpansion(
-            """
-            #stringify(a + b)
-            """,
-            expandedSource: """
-            (a + b, "a + b")
-            """,
-            macros: testMacros
-        )
-        #else
-        throw XCTSkip("macros are only supported when running tests for the host platform")
-        #endif
+
+    private let testMacros = ["decimal": DecimalMacro.self]
+
+    func testMacroExpansion() {
+        assertMacroExpansion("#decimal(3.24)", expandedSource: "Decimal(string: \"3.24\")!", macros: testMacros)
+        assertMacroExpansion("#decimal(-7.14)", expandedSource: "Decimal(string: \"-7.14\")!", macros: testMacros)
+
+        assertMacroExpansion("#decimal(0.0)", expandedSource: "Decimal(string: \"0.0\")!", macros: testMacros)
+        assertMacroExpansion("#decimal(-0.0)", expandedSource: "Decimal(string: \"-0.0\")!", macros: testMacros)
+
+        assertMacroExpansion("#decimal(3)", expandedSource: "Decimal(string: \"3\")!", macros: testMacros)
+        assertMacroExpansion("#decimal(-7)", expandedSource: "Decimal(string: \"-7\")!", macros: testMacros)
+
+        assertMacroExpansion("#decimal(0)", expandedSource: "Decimal(string: \"0\")!", macros: testMacros)
+        assertMacroExpansion("#decimal(-0)", expandedSource: "Decimal(string: \"-0\")!", macros: testMacros)
     }
 
-    func testMacroWithStringLiteral() throws {
-        #if canImport(DecimalMacroMacros)
+    func testMacroFailure() {
         assertMacroExpansion(
-            #"""
-            #stringify("Hello, \(name)")
-            """#,
-            expandedSource: #"""
-            ("Hello, \(name)", #""Hello, \(name)""#)
-            """#,
-            macros: testMacros
-        )
-        #else
-        throw XCTSkip("macros are only supported when running tests for the host platform")
-        #endif
+            "#decimal()",
+            expandedSource: "#decimal()",
+            diagnostics: [
+                DiagnosticSpec(message: "No arguments received", line: 1, column: 1)
+            ],
+            macros: testMacros)
+
+        assertMacroExpansion(
+            "#decimal(Double.nan)",
+            expandedSource: "#decimal(Double.nan)",
+            diagnostics: [
+                DiagnosticSpec(message: "Unsupported argument type: MemberAccessExprSyntax", line: 1, column: 1)
+            ],
+            macros: testMacros)
     }
+
 }
