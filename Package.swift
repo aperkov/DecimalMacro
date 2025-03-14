@@ -42,7 +42,6 @@ let package = Package(
 
 var swiftSettings: [SwiftSetting] {
     [
-        .swiftLanguageMode(.v6),
-        .unsafeFlags(["-warnings-as-errors"])
+        .swiftLanguageMode(.v6)
     ]
 }
