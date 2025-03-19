@@ -1,3 +1,5 @@
+import Foundation
+import RegexBuilder
 import SwiftSyntax
 import SwiftSyntaxMacros
 
@@ -16,27 +18,40 @@ public struct DecimalMacro: ExpressionMacro {
         in context: some MacroExpansionContext
     ) throws -> ExprSyntax {
 
-        guard let argumentExpression = node.arguments.first?.expression else {
+        guard let argumentAsString = node.arguments.first?.expression.description else {
             throw DecimalMacroError.noArguments
         }
 
-        guard isNumericLiteral(argumentExpression) || isPrefixedNumericLiteral(argumentExpression) else {
-            throw DecimalMacroError.unsupportedArgumentType(argumentExpression.syntaxNodeType)
+        guard let argument = parseArgument(argumentAsString) else {
+            throw DecimalMacroError.unsupportedArgument(argumentAsString)
         }
 
-        return "Decimal(string: \"\(argumentExpression)\")!"
+        return
+            "Decimal(sign: .\(raw: argument.sign), exponent: \(raw: argument.exponent), significand: \(raw: argument.significand))"
     }
 
-    private static func isNumericLiteral(_ expression: ExprSyntax) -> Bool {
-        expression.is(FloatLiteralExprSyntax.self) || expression.is(IntegerLiteralExprSyntax.self)
-    }
+    private static func parseArgument(_ value: String) -> Decimal? {
+        // By the time we get here the Swift compiler has already verified that `value` is a valid `FloatLiteralType`.
+        //
+        // However the `Decimal` initialiser we use consumes decimal literal characters and then ignores unknown
+        // trailing characters (like the C `atof` function). This means it will produce an incorrect result for binary,
+        // octal, or hexadecimal literals. For now we reject these so the user gets a compile time error.
 
-    private static func isPrefixedNumericLiteral(_ expression: ExprSyntax) -> Bool {
-        guard let prefixOperator = expression.as(PrefixOperatorExprSyntax.self) else {
-            return false
+        let valueWithoutGrouping = value.replacing("_", with: "")
+
+        let invalidChars = Regex {
+            CharacterClass(
+                .digit,
+                .anyOf("+-.eE")
+            )
+            .inverted
         }
 
-        return isNumericLiteral(prefixOperator.expression)
+        guard !valueWithoutGrouping.contains(invalidChars) else {
+            return nil
+        }
+
+        return Decimal(string: valueWithoutGrouping)
     }
 
 }

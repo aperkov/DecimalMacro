@@ -67,12 +67,12 @@ Initialising with `Decimal(3.24)` invokes `init(_ value: Double)`.
 See the problem? The literal you supply is converted to a `Double` and then to `Decimal`. This introduces floating point 
 precision problems. Avoiding these problems is probably why you wanted to use `Decimal` in the first place. 
 
-You can initialise a precise `Decimal` value in Swift:
+Without the macro you can initialise a precise `Decimal` value in Swift:
 
 1. From a string literal - e.g. `Decimal(string: "3.24")!`
 2. From an exponent and significand - e.g. `Decimal(sign: .plus, exponent: -2, significand: 324)`
 
-If you use option 1 you lose compile time type checking.
+If you use option 1 you lose compile time type checking, and incur the cost of parsing a string at runtime.
 
 If you use option 2 your code becomes hard to read and write.
 
@@ -87,14 +87,20 @@ This code:
 Takes the floating point literal you supply and expands to:
 
 ```swift
-Decimal(string: "3.24")!
+Decimal(sign: .plus, exponent: -2, significand: 324)
 ```
 
 This way:
  
 1. You retain compile time type checking.
 2. Your code is easy to read and write.
-3. The expanded code is easy to compare to the code you wrote. 
+3. The expanded code doesn't incur the cost of parsing a string at runtime. 
+
+## Limitations
+
+The `#decimal` macro accepts decimal floating point literal arguments. 
+
+A compilation error will occur if `#decimal` is passed binary, octal, or hexidecimal literals.  
 
 ## License
 
