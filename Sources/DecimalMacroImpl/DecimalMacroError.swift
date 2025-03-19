@@ -8,13 +8,13 @@ public enum DecimalMacroError: Error, CustomStringConvertible {
     case noArguments
 
     /// The macro received an unsupported argument.
-    case unsupportedArgumentType(SyntaxProtocol.Type)
+    case unsupportedArgument(String)
 
     /// A textual representation of this error.
     public var description: String {
         switch self {
             case .noArguments: "No arguments received"
-            case .unsupportedArgumentType(let syntaxNodeType): "Unsupported argument type: \(syntaxNodeType)"
+            case .unsupportedArgument(let value): "Cannot parse '\(value)' as a 'Decimal'"
         }
     }
 
