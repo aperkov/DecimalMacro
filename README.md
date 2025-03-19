@@ -2,6 +2,9 @@
 
 A Swift macro that makes it easy to declare `Decimal` values precisely.
 
+[![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Faperkov%2FDecimalMacro%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/aperkov/DecimalMacro)
+[![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Faperkov%2FDecimalMacro%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/aperkov/DecimalMacro)
+
 ## Adding to your project
 
 To use DecimalMacro in a SwiftPM project:
