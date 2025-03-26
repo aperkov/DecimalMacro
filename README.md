@@ -130,13 +130,13 @@ And this code:
 #decimal(0.18446744073709551616)
 ``` 
 
-Contains more significant digits than fit into `UInt64`, so it expands to:
+Contains significant digits that don't fit into `UInt64`, so it expands to:
 
 ```swift
 Decimal(_exponent: -20, _length: 5, _isNegative: 0, _isCompact: 1, _reserved: 0, _mantissa: (0, 0, 0, 0, 1, 0, 0, 0))
 ```
 
-This way:
+Using `#decimal`:
 
 1. Your code is easy to read and write. 
 2. You retain compile time type checking.
