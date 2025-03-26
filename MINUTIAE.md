@@ -5,7 +5,7 @@
 The `Decimal` type stores its significant digits as an unsigned 128 bit value (8 \* `UInt16` values). So the largest 
 supported significand is about 38.5 decimal digits. You can compute this with `log10(2^128 - 1)`.
 
-The "simple" `Decimal` initialiser can accept its significant digits as an unsigned 64 bit value (an `UInt64`). So the 
+The `Decimal` initialiser that accepts "small" significands can be passed an unsigned 64 bit value (an `UInt64`). So the 
 largest significand you can supply is about 19.3 decimal digits. You can compute this with `log10(2^64 - 1)`. 
 
 ## `Decimal` parsing Locale considerations
@@ -14,7 +14,7 @@ It's easy to introduce subtle bugs if you rely on the `Decimal` initialisers tha
 
 For example this code:
 
-```
+```swift
 let australianLocale = Locale(identifier: "en_AU")
 let spanishLocale = Locale(identifier: "es_ES")
 

@@ -33,9 +33,9 @@ This code:
 
 ```swift
 let good = #decimal(3.24)
-print(good)
-
 let alsoGood = #decimal(1234567890.0987654321)
+
+print(good)
 print(alsoGood) 
 ```
 
@@ -54,6 +54,7 @@ This code:
 
 ```swift
 let bad = Decimal(3.24)
+
 print(bad)
 ``` 
 
@@ -72,11 +73,26 @@ precision problems. Avoiding these problems is probably why you wanted to use `D
 
 Without the `#decimal` macro you can declare a precise `Decimal` value in various ways:
 
-1. From a string literal - e.g. `Decimal(string: "3.24", locale: Locale.current)!`
-2. From a signed 32 bit significand and exponent - e.g. `Decimal(sign: .plus, exponent: -2, significand: 324)`. The 
-   `significand` is itself a `Decimal`, so you can use tweak this approach to pass an unsigned 64 bit significand.
-3. From an unsigned 128 bit significand and exponent - e.g. 
-   `Decimal(_exponent: -2, _length: 1, _isNegative: 0, _isCompact: 1, _reserved: 0, _mantissa: (324, 0, 0, 0, 0, 0, 0, 0))`
+```swift
+// Option #1 - parse a string.
+let a = Decimal(string: "3.24", locale: Locale.current)!
+
+// Option #2 - provide a "small" significand and exponent. 
+// The significand can be up to 2^64 - 1, or about 20 decimal digits.  
+let b = Decimal(sign: .plus, exponent: -2, significand: 324)
+let c = Decimal(sign: .plus, exponent: -2, significand: Decimal(324 as UInt64))
+
+// Option #3 - provide a large significand (aka mantissa) and exponent. 
+// The significand can be up to 2^128 - 1, or about 39 decimal digits. 
+let d = Decimal(
+    _exponent: -2, 
+    _length: 1, 
+    _isNegative: 0, 
+    _isCompact: 1, 
+    _reserved: 0, 
+    _mantissa: (324, 0, 0, 0, 0, 0, 0, 0)
+)
+```
 
 None of these are great options.
 
@@ -102,15 +118,13 @@ Expands to:
 Decimal(sign: .plus, exponent: -2, significand: Decimal(324 as UInt64))
 ```
 
-If your literal contains more than 19 significant digits a different initialiser is needed. 
-
-So this code:
+And this code:
 
 ```swift
 #decimal(0.18446744073709551616)
 ``` 
 
-Expands to:
+Contains more significant digits than fit into `UInt64`, so it expands to:
 
 ```swift
 Decimal(_exponent: -20, _length: 5, _isNegative: 0, _isCompact: 1, _reserved: 0, _mantissa: (0, 0, 0, 0, 1, 0, 0, 0))
@@ -137,7 +151,7 @@ A compilation error will occur if `#decimal` is passed literals containing:
 4. More that one trailing zero. E.g. `3.00`
 5. Non-canonical scientific notation.  E.g. `1234.5e1` (instead of `1.2345e4`).
 
-It is possible to support these literals. Choosing not to keeps the macro implementation simpler.
+Choosing not to support these literals keeps the macro implementation simpler.
 
 ## License
 

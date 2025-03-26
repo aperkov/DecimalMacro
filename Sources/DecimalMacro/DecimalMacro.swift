@@ -8,9 +8,9 @@ import Foundation
 /// import DecimalMacro
 ///
 /// let good = #decimal(3.24)
-/// print(good)
-///
 /// let alsoGood = #decimal(1234567890.0987654321)
+///
+/// print(good)
 /// print(alsoGood)
 /// ```
 ///
@@ -25,6 +25,7 @@ import Foundation
 ///
 /// ```
 /// let bad = Decimal(3.24)
+///
 /// print(bad)
 /// ```
 ///
