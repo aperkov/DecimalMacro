@@ -13,7 +13,7 @@ To use DecimalMacro in a SwiftPM project:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/aperkov/DecimalMacro.git", from: "1.0.0")
+    .package(url: "https://www.github.com/aperkov/DecimalMacro.git", from: "1.0.0")
 ],
 ```
 
@@ -74,22 +74,25 @@ The examples above invoke `init(_ value: Double)` and `init(floatLiteral value: 
 See the problem? 
 
 In both cases the literal you supply is converted to a `Double` and then to a `Decimal`. This introduces floating point 
-precision problems. This is annoying because avoiding these problems is probably why you wanted to use `Decimal` in the 
+precision problems, and is annoying because avoiding these problems is probably why you wanted to use `Decimal` in the 
 first place. 
 
 Without the `#decimal` macro you can declare a precise `Decimal` value in various ways:
 
 ```swift
 // Option #1 - parse a string.
+
 let a = Decimal(string: "3.24", locale: Locale.current)!
 
 // Option #2 - provide a "small" significand and exponent. 
-// The significand can be up to 2^64 - 1, or about 20 decimal digits.  
+// The significand can be up to 2^64 - 1, or about 20 decimal digits.
+  
 let b = Decimal(sign: .plus, exponent: -2, significand: 324)
 let c = Decimal(sign: .plus, exponent: -2, significand: Decimal(324 as UInt64))
 
 // Option #3 - provide a large significand (aka mantissa) and exponent. 
-// The significand can be up to 2^128 - 1, or about 39 decimal digits. 
+// The significand can be up to 2^128 - 1, or about 39 decimal digits.
+ 
 let d = Decimal(
     _exponent: -2, 
     _length: 1, 
