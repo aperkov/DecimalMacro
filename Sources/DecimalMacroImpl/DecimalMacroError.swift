@@ -14,7 +14,7 @@ public enum DecimalMacroError: Error, CustomStringConvertible {
     public var description: String {
         switch self {
             case .noArguments: "No arguments received"
-            case .unsupportedArgument(let value): "Cannot parse '\(value)' as a 'Decimal'"
+            case .unsupportedArgument(let value): "Cannot convert '\(value)' to 'Decimal'"
         }
     }
 

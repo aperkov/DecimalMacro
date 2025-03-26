@@ -2,15 +2,15 @@ import Foundation
 
 /// A macro that makes it easy to declare `Decimal` values precisely.
 ///
-/// For example this code:
+/// This code:
 ///
 /// ```
 /// import DecimalMacro
 ///
 /// let good = #decimal(3.24)
-/// print(good)
-///
 /// let alsoGood = #decimal(1234567890.0987654321)
+///
+/// print(good)
 /// print(alsoGood)
 /// ```
 ///
@@ -25,14 +25,21 @@ import Foundation
 ///
 /// ```
 /// let bad = Decimal(3.24)
+/// let alsoBad = 3.24 as Decimal
+///
 /// print(bad)
+/// print(alsoBad)
 /// ```
 ///
 /// Which produces this output:
 ///
 /// ```
 /// 3.240000000000000512
+/// 3.240000000000000512
 /// ```
+///
+/// - Parameters:
+///   - value: The decimal value.
 @freestanding(expression)
 public macro decimal(_ value: FloatLiteralType) -> Decimal =
     #externalMacro(module: "DecimalMacroImpl", type: "DecimalMacro")

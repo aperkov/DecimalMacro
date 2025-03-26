@@ -33,9 +33,9 @@ This code:
 
 ```swift
 let good = #decimal(3.24)
-print(good)
-
 let alsoGood = #decimal(1234567890.0987654321)
+
+print(good)
 print(alsoGood) 
 ```
 
@@ -48,36 +48,67 @@ Produces the output you probably expect:
 
 ## What problem does this solve?
 
-The most intuitive way to declare a `Decimal` value in Swift probably doesn't behave the way you expect.
+The most intuitive ways to declare a `Decimal` value in Swift probably don't behave the way you expect.
 
 This code:
 
 ```swift
 let bad = Decimal(3.24)
+let alsoBad = 3.24 as Decimal
+
 print(bad)
+print(alsoBad)
 ``` 
 
 Produces surprising (arguably incorrect) output:
 
 ```
 3.240000000000000512
+3.240000000000000512
 ```
 
 Why is this so?
 
-Initialising with `Decimal(3.24)` invokes `init(_ value: Double)`. 
+The examples above invoke `init(_ value: Double)` and `init(floatLiteral value: Double)` respectively. 
 
-See the problem? The literal you supply is converted to a `Double` and then to `Decimal`. This introduces floating point 
-precision problems. Avoiding these problems is probably why you wanted to use `Decimal` in the first place. 
+See the problem? 
 
-Without the macro you can initialise a precise `Decimal` value in Swift:
+In both cases the literal you supply is converted to a `Double` and then to a `Decimal`. This introduces floating point 
+precision problems. This is annoying because avoiding these problems is probably why you wanted to use `Decimal` in the 
+first place. 
 
-1. From a string literal - e.g. `Decimal(string: "3.24")!`
-2. From an exponent and significand - e.g. `Decimal(sign: .plus, exponent: -2, significand: 324)`
+Without the `#decimal` macro you can declare a precise `Decimal` value in various ways:
 
-If you use option 1 you lose compile time type checking, and incur the cost of parsing a string at runtime.
+```swift
+// Option #1 - parse a string.
+let a = Decimal(string: "3.24", locale: Locale.current)!
 
-If you use option 2 your code becomes hard to read and write.
+// Option #2 - provide a "small" significand and exponent. 
+// The significand can be up to 2^64 - 1, or about 20 decimal digits.  
+let b = Decimal(sign: .plus, exponent: -2, significand: 324)
+let c = Decimal(sign: .plus, exponent: -2, significand: Decimal(324 as UInt64))
+
+// Option #3 - provide a large significand (aka mantissa) and exponent. 
+// The significand can be up to 2^128 - 1, or about 39 decimal digits. 
+let d = Decimal(
+    _exponent: -2, 
+    _length: 1, 
+    _isNegative: 0, 
+    _isCompact: 1, 
+    _reserved: 0, 
+    _mantissa: (324, 0, 0, 0, 0, 0, 0, 0)
+)
+```
+
+None of these are great options.
+
+If you use option 1 you lose compile time type checking, risk locale related bugs, and incur the cost of parsing a 
+string at runtime.
+
+If you use option 2 your code becomes hard to read and write, and the number of significant digits supported is 
+reduced from about 39 to about 20.
+
+If you use option 3 your code becomes _really_ hard to read and write. 
 
 ## What does the macro expand to? 
 
@@ -87,23 +118,46 @@ This code:
 #decimal(3.24)
 ```
 
-Takes the floating point literal you supply and expands to:
+Expands to:
 
 ```swift
-Decimal(sign: .plus, exponent: -2, significand: 324)
+Decimal(sign: .plus, exponent: -2, significand: Decimal(324 as UInt64))
 ```
 
-This way:
- 
-1. You retain compile time type checking.
-2. Your code is easy to read and write.
-3. The expanded code doesn't incur the cost of parsing a string at runtime. 
+And this code:
+
+```swift
+#decimal(0.18446744073709551616)
+``` 
+
+Contains significant digits that don't fit into `UInt64`, so it expands to:
+
+```swift
+Decimal(_exponent: -20, _length: 5, _isNegative: 0, _isCompact: 1, _reserved: 0, _mantissa: (0, 0, 0, 0, 1, 0, 0, 0))
+```
+
+Using `#decimal`:
+
+1. Your code is easy to read and write. 
+2. You retain compile time type checking.
+3. You can use the full range of the `Decimal` type (up to 39 significant digits).
+4. Expanded code is as readable as possible.
+5. Your code avoids locale related bugs.
+6. Your code avoids the cost of parsing strings at runtime.
 
 ## Limitations
 
 The `#decimal` macro accepts decimal floating point literal arguments. 
 
-A compilation error will occur if `#decimal` is passed binary, octal, or hexidecimal literals.  
+A compilation error will occur if `#decimal` is passed literals containing:
+ 
+1. Binary, octal, or hexidecimal values.
+2. Negative zero. 
+3. Leading zeros. E.g. `03`.
+4. More that one trailing zero. E.g. `3.00`
+5. Non-canonical scientific notation.  E.g. `1234.5e1` (instead of `1.2345e4`).
+
+Choosing not to support these literals keeps the macro implementation simpler.
 
 ## License
 
