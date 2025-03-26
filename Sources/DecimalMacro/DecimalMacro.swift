@@ -2,7 +2,7 @@ import Foundation
 
 /// A macro that makes it easy to declare `Decimal` values precisely.
 ///
-/// For example this code:
+/// This code:
 ///
 /// ```
 /// import DecimalMacro
@@ -33,6 +33,9 @@ import Foundation
 /// ```
 /// 3.240000000000000512
 /// ```
+///
+/// - Parameters:
+///   - value: The decimal value.
 @freestanding(expression)
 public macro decimal(_ value: FloatLiteralType) -> Decimal =
     #externalMacro(module: "DecimalMacroImpl", type: "DecimalMacro")
