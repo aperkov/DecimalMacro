@@ -48,28 +48,34 @@ Produces the output you probably expect:
 
 ## What problem does this solve?
 
-The most intuitive way to declare a `Decimal` value in Swift probably doesn't behave the way you expect.
+The most intuitive ways to declare a `Decimal` value in Swift probably don't behave the way you expect.
 
 This code:
 
 ```swift
 let bad = Decimal(3.24)
+let alsoBad = 3.24 as Decimal
 
 print(bad)
+print(alsoBad)
 ``` 
 
 Produces surprising (arguably incorrect) output:
 
 ```
 3.240000000000000512
+3.240000000000000512
 ```
 
 Why is this so?
 
-Initialising with `Decimal(3.24)` invokes `init(_ value: Double)`. 
+The examples above invoke `init(_ value: Double)` and `init(floatLiteral value: Double)` respectively. 
 
-See the problem? The literal you supply is converted to a `Double` and then to `Decimal`. This introduces floating point 
-precision problems. Avoiding these problems is probably why you wanted to use `Decimal` in the first place. 
+See the problem? 
+
+In both cases the literal you supply is converted to a `Double` and then to a `Decimal`. This introduces floating point 
+precision problems. This is annoying because avoiding these problems is probably why you wanted to use `Decimal` in the 
+first place. 
 
 Without the `#decimal` macro you can declare a precise `Decimal` value in various ways:
 

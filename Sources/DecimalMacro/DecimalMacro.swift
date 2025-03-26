@@ -25,13 +25,16 @@ import Foundation
 ///
 /// ```
 /// let bad = Decimal(3.24)
+/// let alsoBad = 3.24 as Decimal
 ///
 /// print(bad)
+/// print(alsoBad)
 /// ```
 ///
 /// Which produces this output:
 ///
 /// ```
+/// 3.240000000000000512
 /// 3.240000000000000512
 /// ```
 ///
