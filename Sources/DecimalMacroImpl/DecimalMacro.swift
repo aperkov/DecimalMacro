@@ -23,17 +23,30 @@ public struct DecimalMacro: ExpressionMacro {
         in context: some MacroExpansionContext
     ) throws -> ExprSyntax {
 
-        guard let argumentAsString = node.arguments.first?.expression.description else {
+        guard let argument = node.arguments.first?.expression else {
             throw DecimalMacroError.noArguments
         }
 
-        guard let argumentAsDecimal = parseArgument(argumentAsString) else {
+        let argumentAsString = argument.description
+
+        guard isNumericLiteral(argument), let argumentAsDecimal = parseArgument(argumentAsString) else {
             throw DecimalMacroError.unsupportedArgument(argumentAsString)
         }
 
         return argumentAsDecimal.significand <= Decimal(UInt64.max)
             ? toSimpleExpression(argumentAsDecimal)
             : toFullExpression(argumentAsDecimal)
+    }
+
+    private static func isNumericLiteral(_ expression: ExprSyntax) -> Bool {
+        // `normaliseArgument` strips underscores, which would turn an identifier such as `_42` into the literal `42`.
+        // Only accept integer and floating point literals, optionally behind a prefix `+` or `-`.
+
+        if let prefixed = expression.as(PrefixOperatorExprSyntax.self) {
+            return ["+", "-"].contains(prefixed.operator.text) && isNumericLiteral(prefixed.expression)
+        }
+
+        return expression.is(IntegerLiteralExprSyntax.self) || expression.is(FloatLiteralExprSyntax.self)
     }
 
     private static func parseArgument(_ valueAsRawString: String) -> Decimal? {
